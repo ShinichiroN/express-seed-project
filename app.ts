@@ -1,12 +1,13 @@
 const express = require('express');
 const mysql = require('mysql');
+const cors = require('cors');
 const app = express();
 
 // mysqlの接続設定
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'インストールした際のやつに変えてください',
+    password: 'shinichiro217',
     database: 'express_sample'
 });
 
@@ -16,8 +17,13 @@ connection.connect((err) => {
       console.log('error connecting: ' + err.stack);
       return;
     }
-    console.log('success');
 });
+
+app.use(cors({
+  origin:'http://localhost:3000', // アクセス許可するオリジン
+  credentials: true,            // レスポンスヘッダーにAccess-Control-Allow-Credentials追加
+  optionSuccessStatus:200       //レスポンスstatusを200に設定
+}))
   
 app.get('/', (req, res) => {
     connection.query(
@@ -30,4 +36,20 @@ app.get('/', (req, res) => {
     //res.render('hello.ejs');
 });
 
-app.listen(3000);
+// 'hello worldを返す'
+app.get('/test', (req, res) => {
+  res.send('hello world');
+})
+
+// usersテーブルの値を全て返す
+app.get('/get-all-users', (req, res) => {
+    connection.query(
+        'SELECT * FROM users',
+        (error, results) => {
+          console.log(results);
+          res.json(results);
+        }
+    );
+});
+
+app.listen(3001);
